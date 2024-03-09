@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-<script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <meta charset="UTF-8" />
     <title>دستیار هوشمند سوشیانس</title>
     <style>
       body {
-import json
+        /* Add your CSS styles here */
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      import json
 import re
 import random
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
@@ -138,3 +144,6 @@ for pattern, response in user_input_patterns.items():
 # If the user input does not match any of the patterns, provide a generic response
 else:
     print("Sorry, I can't help you with that.")
+    </script>
+  </body>
+</html>
