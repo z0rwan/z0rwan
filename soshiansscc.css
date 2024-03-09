@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Soshians Intelligent Assistant</title>
+  <style>
+    body {
+      background-color: #a259ff;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .form-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #dddddd;
+      border-radius: 5px;
+    }
+
+    .btn {
+      background-color: #a259ff;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .answer {
+      background-color: #f0f0f0;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h1>دستیار هوشمند سوشیانس</h1>
+      <form>
+        <input type="text" placeholder="Enter your question here..." />
+        <input type="submit" class="btn" value="Submit" />
+      </form>
+    </div>
+  </div>
+
+  <script type="pyscript">
+    const form = document.querySelector("form");
+    const answerContainer = document.createElement("div");
+    answerContainer.classList.add("answer");
+    document.body.appendChild(answerContainer);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const question = e.target.querySelector("input[type=text]").value;
+      pyodide.runPython(print_answer('${question}'));
+    });
+
+    pyodide.runPython(
+      def print_answer(question):
+        import soshians_assistant
+        answer = soshians_assistant.get_answer(question)
+        print(answer)
+        answerContainer.innerText = answer
+    );
+  </script>
+</body>
+</html>
