@@ -1,0 +1,131 @@
+import json
+import re
+import random
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+tokenizer = AutoTokenizer.from_pretrained("mrm8488/t5-base-finetuned-text-to-json")
+model = AutoModelForSeq2SeqLM.from_pretrained("mrm8488/t5-base-finetuned-text-to-json")
+
+website_patterns = [
+    re.compile(r'.*\.(com|net|org)'),
+    re.compile(r'.*\.(ir|ae|sa)')
+]
+data_patterns = {
+    'video': re.compile(r'.*\.(mp4|mkv|avi|mov)'),
+    'voice': re.compile(r'.*\.(mp3|wav|ogg|flac)'),
+    'text': re.compile(r'.*\.(txt|doc|docx|pdf)')
+}
+
+user_input_patterns = {
+    'invoice': re.compile(r'.*(فاکتور|صورتحساب).*')
+}
+
+# Crawl the websites and extract the data
+websites = [
+    "https://t.me/SherwinVakiliArt",
+    "http://www.instagram.com/sherwinvakiliofficial",
+    "https://www.instagram.com/sherwin_vakili/",
+    "https://www.youtube.com/SherwinVakili",
+    "Www.t.me/sherwinvakili",
+    "www.soshians.ir",
+]
+
+data = []
+
+for website in websites:
+
+    if any(pattern.match(website) for pattern in website_patterns):
+        # Pretend to get the HTML content of the website
+        videos = [
+            {
+                'type': 'video',
+                'url': f'https://example.com/video{random.randint(1, 10)}.mp4'
+            }
+            for _ in range(random.randint(1, 5))
+        ]
+        voices = [
+            {
+                'type': 'voice',
+                'url': f'https://example.com/voice{random.randint(1, 10)}.mp3'
+            }
+            for _ in range(random.randint(1, 5))
+        ]
+        texts = [
+            {
+                'type': 'text',
+                'url': f'https://example.com/text{random.randint(1, 10)}.txt'
+            }
+            for _ in range(random.randint(1, 5))
+        ]
+
+        data.extend(videos)
+        data.extend(voices)
+        data.extend(texts)
+
+invoice = {
+    'customer_name': 'نام ',
+    'invoice_number': f'INV-{random.randint(100000, 999999)}',
+    'invoice_date': '2023-03-08',
+    'items': data,
+    'total_amount': len(data)
+}
+
+def show_similar_links(crawled_links, user_query, lang='fa'):
+    """
+    Given a list of crawled links and a user query, this function generates a list of
+    similar links to the user query.
+
+    Args:
+        crawled_links: A list of crawled links.
+        user_query: The user query.
+        lang: Language code (fa or en)
+
+    Returns:
+        A list of similar links to the user query.
+    """
+    query_tokens = tokenizer(user_query, return_tensors="pt")
+
+    if lang == 'fa':
+        lang_code = 'fa_FA'
+    elif lang == 'en':
+        lang_code = 'en_XX'
+    else:
+        lang_code = 'fa_FA'
+
+    similarity_scores = []
+    for link in crawled_links:
+        link_tokens = tokenizer(link, return_tensors="pt")
+        similarity_score = model(query_tokens, link_tokens, output_scores=True).logits.item()
+        similarity_scores.append(similarity_score)
+
+    sorted_links = sorted(zip(crawled_links, similarity_scores), key=lambda x: x[1], reverse=True)
+    return [link for link, score in sorted_links[:5]]
+
+user_input = input("What do you need help with? ")
+
+for pattern, response in user_input_patterns.items():
+    if pattern.match(user_input):
+        input_ids = tokenizer.encode(user_input, return_tensors="pt")
+
+        output = model.generate(input_ids, max_length=128)
+
+        response = tokenizer.decode(output[0])
+        print(response)
+
+        # Generate the invoice if the user requested it
+        if pattern == 'invoice':
+            print("Here's your invoice:")
+            print(json.dumps(invoice, indent=4))
+
+        # Show similar links if the user provided a query
+        if user_query and crawled_links:
+            similar_links = show_similar_links(crawled_links, user_query)
+            print("Here are some links that are similar to your query:")
+            for link in similar_links:
+                print(link)
+
+        break
+
+# If the user input does not match any of the patterns, provide a generic response
+else:
+    print("Sorry, I can't help you with that.")
