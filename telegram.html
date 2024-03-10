@@ -1,0 +1,53 @@
+ 
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1>Task Manager</h1>
+   from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+# Define your bot token
+TOKEN = 'YOUR_BOT_TOKEN'
+
+# Define a function to handle text messages
+def text_handler(update: Update, context: CallbackContext):
+    text = update.message.text
+    print(f'Text Message: {text}')
+
+# Define a function to handle images
+def image_handler(update: Update, context: CallbackContext):
+    # Extract text from the image using Tesseract OCR or other libraries
+    # Example code for extracting text from an image using Tesseract OCR
+    # img = Image.open('image.jpg')
+    # text = pytesseract.image_to_string(img)
+    # print(f'Image Text: {text}')
+    pass
+
+def main():
+    updater = Updater(TOKEN)
+
+    dp = updater.dispatcher
+
+    # Register handlers for different types of messages
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, text_handler))
+    dp.add_handler(MessageHandler(Filters.photo, image_handler))
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main() 
+ <div class="task-input">
+        <input type="text" placeholder="Enter a task">
+        <button>Add Task</button>
+    </div>
+    <ul class="task-list">
+        <li>Task 1</li>
+        <li>Task 2</li>
+        <li>Task 3</li>
+    </ul>
+</body>
+</html>

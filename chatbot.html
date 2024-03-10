@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
-    <meta charset="UTF-8" />
-    <title>دستیار هوشمند سوشیانس</title>
-    <style>
-      body {
-        /* Add your CSS styles here */
-      }
-    </style>
-  </head>
-  <body>
-    <py-script>
-     import json
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1>Task Manager</h1>
+   
+
+import json
 import re
 import random
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from telethon.sync import TelegramClient
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, MarianTokenizer
+from googletrans import Translator
 
+translator = Translator()
 tokenizer = AutoTokenizer.from_pretrained("mrm8488/t5-base-finetuned-text-to-json")
 model = AutoModelForSeq2SeqLM.from_pretrained("mrm8488/t5-base-finetuned-text-to-json")
 
 website_patterns = [
-    re.compile(r'.*\.(com|net|org)'),
+    re.compile(r'.*\.(com|net|org|me)'),
     re.compile(r'.*\.(ir|ae|sa)')
 ]
 data_patterns = {
@@ -107,6 +104,7 @@ def show_similar_links(crawled_links, user_query, lang='fa'):
     else:
         lang_code = 'fa_FA'
 
+
     similarity_scores = []
     for link in crawled_links:
         link_tokens = tokenizer(link, return_tensors="pt")
@@ -116,7 +114,7 @@ def show_similar_links(crawled_links, user_query, lang='fa'):
     sorted_links = sorted(zip(crawled_links, similarity_scores), key=lambda x: x[1], reverse=True)
     return [link for link, score in sorted_links[:5]]
 
-user_input = input("What do you need help with? ")
+user_input = input("دستیار هوشمند سوشیانس!پرسشگر باشید ")
 
 for pattern, response in user_input_patterns.items():
     if pattern.match(user_input):
@@ -129,21 +127,29 @@ for pattern, response in user_input_patterns.items():
 
         # Generate the invoice if the user requested it
         if pattern == 'invoice':
-            print("Here's your invoice:")
+            print("نتیجهی ژرف کاوی:")
             print(json.dumps(invoice, indent=4))
 
         # Show similar links if the user provided a query
         if user_query and crawled_links:
             similar_links = show_similar_links(crawled_links, user_query)
-            print("Here are some links that are similar to your query:")
+            print("یک لیست از آنچه به پرسش شما نزدیک است:")
             for link in similar_links:
                 print(link)
 
         break
-
 # If the user input does not match any of the patterns, provide a generic response
 else:
-    print("Sorry, I can't help you with that.")
-    </py-script>
-  </body>
+    print("در این زمینه نمیتوانم کمکی بکنم")
+
+ <div class="task-input">
+        <input type="text" placeholder="Enter a task">
+        <button>Add Task</button>
+    </div>
+    <ul class="task-list">
+        <li>Task 1</li>
+        <li>Task 2</li>
+        <li>Task 3</li>
+    </ul>
+</body>
 </html>

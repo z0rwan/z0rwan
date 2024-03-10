@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Purple-violet Theme and Task Manager</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <h1>Task Manager</h1>
+  
+  <div class="task-manager">
+    <input type="text" id="taskInput" placeholder="Enter a task...">
+    <input type="submit" value="Add Task" onclick="addTask()">
+  </div>
+  
+  <div class="task-list">
+    <ul id="taskList">
+    </ul>
+  </div>
+  
+  <div class="tts-controls">
+    <label for="speed">Speed:</label>
+    <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1">
+    <button onclick="speakText()">Speak Text</button>
+    <select id="voices" onchange="setVoice()">
+      <option value="">Default Voice</option>
+    </select>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
+```
+
+JavaScript (script.js):
+```javascript
+// Initialize the SpeechSynthesis API
+const synth = window.speechSynthesis;
+
+// Get the list of voices
+let voices = [];
+
+function populateVoices() {
+  voices = synth.getVoices();
+
+  const voiceSelect = document.getElementById("voices");
+  voiceSelect.innerHTML = "";
+
+  voices.forEach(voice => {
+    const option = document.createElement("option");
+    option.value = voice.name;
+    option.textContent = `${voice.name} (${voice.lang})`;
+    voiceSelect.appendChild(option);
+  });
+}
+
+// Wait for the voices to be loaded before populating the voice list
+if (synth.onvoiceschanged !== undefined) {
+  synth.onvoiceschanged = populateVoices;
+} else {
+  populateVoices();
+}
+
+// Add task to the list
+function addTask() {
+  const taskInput = document.getElementById("taskInput");
+  const taskList = document.getElementById("taskList");
+
+  if (taskInput.value) {
+    const taskItem = document.createElement("li");
+    taskItem.textContent = taskInput.value;
+    taskList.appendChild(taskItem);
+    taskInput.value = "";
+  }
+}
+
+// Speak the text using the selected voice and speed
+function speakText() {
+  const selectedVoice = document.getElementById("voices").value;
+  const speed = document.getElementById("speed").value;
+
+  const taskList = document.getElementById("taskList");
+  const text = taskList.textContent;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voices.find(voice => voice.name === selectedVoice);
+  utterance.rate = parseFloat(speed);
+
+  synth.speak(utterance);
+}
+
+// Set the selected voice for text-to-speech
+function setVoice() {
+  const voiceSelect = document.getElementById("voices");
+  const selectedVoice = voiceSelect.value;
+  
+  if (selectedVoice) {
+    const utterance = new SpeechSynthesisUtterance();
+    utterance.voice = voices.find(voice => voice.name === selectedVoice);
+    synth.speak(utterance);
+  }
+}
